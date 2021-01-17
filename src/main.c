@@ -23,6 +23,8 @@
 int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
+int lsh_ls(char **args);
+int lsh_pwd(char **args);
 
 /*
   List of builtin commands, followed by their corresponding functions.
@@ -30,13 +32,17 @@ int lsh_exit(char **args);
 char *builtin_str[] = {
   "cd",
   "help",
-  "exit"
+  "exit",
+  "ls",
+  "pwd"
 };
 
 int (*builtin_func[]) (char **) = {
   &lsh_cd,
   &lsh_help,
-  &lsh_exit
+  &lsh_exit,
+  &lsh_ls,
+  &lsh_pwd
 };
 
 int lsh_num_builtins() {
@@ -81,6 +87,33 @@ int lsh_help(char **args)
   }
 
   printf("Use the man command for information on other programs.\n");
+  return 1;
+}
+
+int lsh_ls(char** args)
+{
+  DIR *d;
+  struct dirent *dir;
+  d = opendir(".");
+  if (d) {
+    while ((dir = readdir(d)) != NULL) {
+      printf("%s\n", dir->d_name);
+    }
+    closedir(d);
+  }
+  return 1;
+}
+
+int lsh_pwd(char **args)
+{    
+  char cwd[PATH_MAX];
+
+  if (getcwd(cwd, sizeof(cwd)) != NULL)   {
+    printf("%s\n", cwd);
+  } else {
+    perror("lsh");
+  }
+
   return 1;
 }
 
