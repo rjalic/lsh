@@ -2,7 +2,7 @@ LSH
 ===
 
 LSH is a simple implementation of a shell in C, and it is the subject of a
-tutorial on [my website][1].  It demonstrates the basics of how a shell works.
+tutorial on [this website][1].  It demonstrates the basics of how a shell works.
 That is: read, parse, fork, exec, and wait.  Since its purpose is demonstration
 (not feature completeness or even fitness for casual use), it has many
 limitations, including:
@@ -11,8 +11,9 @@ limitations, including:
 * Arguments must be separated by whitespace.
 * No quoting arguments or escaping whitespace.
 * No piping or redirection.
-* Only builtins are: `cd`, `help`, `exit`.
-* Added builtins: `ls`, `pwd`
+* Original builtins are: `cd`, `help`, `exit`.
+* Added builtins: `ls`, `pwd`, `whoami`
+* Added a warning when the background shell is executing commands that aren't supported by lsh
 
 Running
 -------
