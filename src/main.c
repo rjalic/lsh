@@ -26,6 +26,7 @@ int lsh_help(char **args);
 int lsh_exit(char **args);
 int lsh_ls(char **args);
 int lsh_pwd(char **args);
+int lsh_whoami(char **args);
 
 /*
   List of builtin commands, followed by their corresponding functions.
@@ -35,7 +36,8 @@ char *builtin_str[] = {
   "help",
   "exit",
   "ls",
-  "pwd"
+  "pwd",
+  "whoami"
 };
 
 int (*builtin_func[]) (char **) = {
@@ -43,7 +45,8 @@ int (*builtin_func[]) (char **) = {
   &lsh_help,
   &lsh_exit,
   &lsh_ls,
-  &lsh_pwd
+  &lsh_pwd,
+  &lsh_whoami
 };
 
 int lsh_num_builtins() {
@@ -91,6 +94,11 @@ int lsh_help(char **args)
   return 1;
 }
 
+/**
+   @brief Added command: Equivalent of ls -a
+   @param args List of args. Not used.
+   @return Always returns 1, to continue execution
+*/
 int lsh_ls(char** args)
 {
   DIR *d;
@@ -105,16 +113,36 @@ int lsh_ls(char** args)
   return 1;
 }
 
+/**
+   @brief Added command: Equivalent of pwd
+   @param args List of args. Used to print new line after explicit command call.
+   @return Always returns 1, to continue execution
+*/
 int lsh_pwd(char **args)
 {    
   char cwd[PATH_MAX];
 
-  if (getcwd(cwd, sizeof(cwd)) != NULL)   {
-    printf("%s\n", cwd);
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+    printf("%s", cwd);
   } else {
     perror("lsh");
   }
+  if(args != NULL) {
+    printf("\n");
+  }
 
+  return 1;
+}
+
+/**
+   @brief Added command: prints out the current user
+   @param args List of args. Not examined.
+   @return Always returns 1, to continue execution
+*/
+int lsh_whoami(char **args)
+{
+  printf("Logged in as: %s\n", getenv("USER"));
+  
   return 1;
 }
 
@@ -170,12 +198,13 @@ int lsh_execute(char **args)
   if (args[0] == NULL) {
     // An empty command was entered.
     return 1;
-  }
-
-  for (i = 0; i < lsh_num_builtins(); i++) {
-    if (strcmp(args[0], builtin_str[i]) == 0) {
-      return (*builtin_func[i])(args);
+  } else {
+    for (i = 0; i < lsh_num_builtins(); i++) {
+      if (strcmp(args[0], builtin_str[i]) == 0) {
+        return (*builtin_func[i])(args);
+      }
     }
+    perror("That command isn't supported. Running command from native shell...");
   }
 
   return lsh_launch(args);
@@ -288,7 +317,8 @@ void lsh_loop(void)
   int status;
 
   do {
-    printf("> ");
+    lsh_pwd(NULL);
+    printf(" $ ");
     line = lsh_read_line();
     args = lsh_split_line(line);
     status = lsh_execute(args);
